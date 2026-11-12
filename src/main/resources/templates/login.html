@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Вход — Budgetly')}"></head>
+<body>
+  <div th:replace="~{fragments :: header('login')}"></div>
+
+  <main class="container auth-layout">
+    <div class="auth-card">
+      <h1>Вход</h1>
+      <p>Войдите в аккаунт, чтобы продолжить работу с бюджетом.</p>
+
+      <div th:if="${param.error}" class="notice notice-locked">Неверный email или пароль.</div>
+      <div th:if="${registered}" class="notice">Аккаунт создан. Можно войти.</div>
+
+      <form class="form" th:action="@{/login}" method="post">
+        <div class="field">
+          <label for="username">Email</label>
+          <input id="username" name="username" type="email" placeholder="you@example.com" required autofocus>
+        </div>
+        <div class="field">
+          <label for="password">Пароль</label>
+          <input id="password" name="password" type="password" placeholder="••••••••" required>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-primary" type="submit">Войти</button>
+          <a class="btn btn-secondary" th:href="@{/register}">Регистрация</a>
+        </div>
+      </form>
+    </div>
+  </main>
+</body>
+</html>

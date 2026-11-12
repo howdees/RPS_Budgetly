@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Регистрация — Budgetly')}"></head>
+<body>
+  <div th:replace="~{fragments :: header('register')}"></div>
+
+  <main class="container auth-layout">
+    <div class="auth-card">
+      <h1>Регистрация</h1>
+      <p>Создайте аккаунт, чтобы вести личный бюджет.</p>
+
+      <form class="form" th:action="@{/register}" th:object="${form}" method="post">
+        <div class="field">
+          <label for="name">Имя</label>
+          <input id="name" th:field="*{name}" type="text" placeholder="Анна" required>
+          <p class="muted" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></p>
+        </div>
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" th:field="*{email}" type="email" placeholder="you@example.com" required>
+          <p class="muted" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></p>
+        </div>
+        <div class="field">
+          <label for="password">Пароль</label>
+          <input id="password" th:field="*{password}" type="password" placeholder="минимум 6 символов" required>
+          <p class="muted" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></p>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-primary" type="submit">Создать аккаунт</button>
+          <a class="btn btn-secondary" th:href="@{/login}">Уже есть вход</a>
+        </div>
+      </form>
+    </div>
+  </main>
+</body>
+</html>

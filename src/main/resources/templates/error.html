@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Ошибка — Budgetly')}"></head>
+<body>
+  <div th:replace="~{fragments :: header('')}"></div>
+  <main class="container auth-layout">
+    <div class="auth-card">
+      <h1>Что-то пошло не так</h1>
+      <p class="muted">Попробуйте вернуться на главную.</p>
+      <a class="btn btn-primary" th:href="@{/}">На главную</a>
+    </div>
+  </main>
+</body>
+</html>

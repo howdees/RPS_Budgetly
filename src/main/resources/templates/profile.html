@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Личный кабинет — Budgetly')}"></head>
+<body>
+  <div th:replace="~{fragments :: header('profile')}"></div>
+
+  <main class="container">
+    <div class="page-title">
+      <h1>Личный кабинет</h1>
+      <p>Профиль и настройки бюджета</p>
+    </div>
+
+    <div class="app-shell">
+      <div th:replace="~{fragments :: sidebar('profile')}"></div>
+      <div>
+        <div th:replace="~{fragments :: flash}"></div>
+        <div class="grid-2">
+          <section class="panel">
+            <h2>Профиль</h2>
+            <form class="form">
+              <div class="field">
+                <label>Имя</label>
+                <input th:value="${user.name}" readonly>
+              </div>
+              <div class="field">
+                <label>Email</label>
+                <input th:value="${user.email}" readonly>
+              </div>
+              <div class="field">
+                <label>Тип аккаунта</label>
+                <div>
+                  <span class="badge" th:each="r : ${user.roles}"
+                        th:classappend="${r.name() == 'ADMIN'} ? ' badge-admin'"
+                        th:text="${r.name() == 'ADMIN'} ? 'Администратор' : 'Пользователь'">Пользователь</span>
+                </div>
+              </div>
+            </form>
+          </section>
+
+          <section class="panel">
+            <h2>Сводка</h2>
+            <div class="list" style="margin-top:1rem;">
+              <div class="list-item">
+                <div><strong>Категорий</strong></div>
+                <strong th:text="${categoryCount}">0</strong>
+              </div>
+              <div class="list-item">
+                <div><strong>Операций</strong></div>
+                <strong th:text="${transactionCount}">0</strong>
+              </div>
+              <div class="list-item">
+                <div><strong>Статус</strong></div>
+                <strong th:text="${user.enabled} ? 'Активен' : 'Заблокирован'">Активен</strong>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <section class="panel" style="margin-top:1rem;">
+          <h2>Профиль бюджета</h2>
+          <form class="form" th:action="@{/profile/budget}" method="post">
+            <div class="grid-2">
+              <div class="field">
+                <label for="monthlyLimit">Лимит расходов в месяц</label>
+                <input id="monthlyLimit" name="monthlyLimit" type="number" step="0.01" min="0"
+                       th:value="${budgetProfile != null ? budgetProfile.monthlyLimit : '50000'}" required>
+              </div>
+              <div class="field">
+                <label for="currency">Валюта</label>
+                <input id="currency" name="currency" type="text" maxlength="8"
+                       th:value="${budgetProfile != null ? budgetProfile.currency : 'RUB'}" required>
+              </div>
+              <div class="field">
+                <label for="goalTitle">Цель</label>
+                <input id="goalTitle" name="goalTitle" type="text" maxlength="255"
+                       th:value="${budgetProfile != null ? budgetProfile.goalTitle : ''}"
+                       placeholder="Подушка безопасности">
+              </div>
+            </div>
+            <div class="form-actions">
+              <button class="btn btn-primary" type="submit"
+                      th:text="${budgetProfile != null} ? 'Сохранить' : 'Создать'">Создать</button>
+              <button th:if="${budgetProfile != null}" class="btn btn-danger" type="submit"
+                      formaction="#" th:formaction="@{/profile/budget/delete}">Удалить профиль</button>
+            </div>
+          </form>
+        </section>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

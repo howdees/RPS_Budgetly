@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Нет доступа — Budgetly')}"></head>
+<body>
+  <div th:replace="~{fragments :: header('')}"></div>
+
+  <main class="container auth-layout">
+    <div class="auth-card">
+      <h1>Нет доступа</h1>
+      <p>У вас нет прав для просмотра этой страницы.</p>
+      <div class="form-actions">
+        <a class="btn btn-primary" th:href="@{/dashboard}">К обзору</a>
+        <a class="btn btn-secondary" th:href="@{/}">На главную</a>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

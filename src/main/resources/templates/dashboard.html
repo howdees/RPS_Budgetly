@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Обзор — Budgetly')}"></head>
+<body>
+  <div th:replace="~{fragments :: header('dashboard')}"></div>
+
+  <main class="container">
+    <div class="page-title">
+      <h1>Обзор бюджета</h1>
+      <p th:if="${profile != null}" th:text="'Цель: ' + ${profile.goalTitle}">Цель</p>
+      <p th:if="${profile == null}">Сводка по вашим операциям</p>
+    </div>
+
+    <div class="app-shell">
+      <div th:replace="~{fragments :: sidebar('dashboard')}"></div>
+
+      <div>
+        <div class="stats">
+          <article class="stat">
+            <div class="label">Баланс</div>
+            <div class="value" th:text="${#numbers.formatDecimal(balance, 1, 'COMMA', 2, 'POINT')} + ' ₽'">0 ₽</div>
+          </article>
+          <article class="stat">
+            <div class="label">Доходы</div>
+            <div class="value income" th:text="${#numbers.formatDecimal(income, 1, 'COMMA', 2, 'POINT')} + ' ₽'">0 ₽</div>
+          </article>
+          <article class="stat">
+            <div class="label">Расходы</div>
+            <div class="value expense" th:text="${#numbers.formatDecimal(expense, 1, 'COMMA', 2, 'POINT')} + ' ₽'">0 ₽</div>
+          </article>
+        </div>
+
+        <section class="section">
+          <div class="section-head">
+            <div>
+              <h2>Последние операции</h2>
+              <p class="muted">Недавние доходы и расходы</p>
+            </div>
+            <a class="btn btn-primary" th:href="@{/analytics}">Аналитика</a>
+            <a class="btn btn-secondary" th:href="@{/transactions}">Все транзакции</a>
+          </div>
+          <div class="list">
+            <div class="list-item" th:each="tx : ${recent}">
+              <div>
+                <strong th:text="${tx.category.name}">Категория</strong>
+                <div class="meta">
+                  <span th:text="${tx.category.type.name() == 'INCOME'} ? 'Доход' : 'Расход'">Тип</span>
+                  ·
+                  <span th:text="${tx.operatedOn}">дата</span>
+                </div>
+              </div>
+              <div th:classappend="${tx.category.type.name() == 'INCOME'} ? ' amount-income' : ' amount-expense'"
+                   th:text="${(tx.category.type.name() == 'INCOME' ? '+' : '−') + #numbers.formatDecimal(tx.amount, 1, 'COMMA', 2, 'POINT') + ' ₽'}">
+                0 ₽
+              </div>
+            </div>
+            <div th:if="${#lists.isEmpty(recent)}" class="empty-state">Пока нет операций</div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+</body>
+</html>
