@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Категории — Budgetly')}"></head>
+<body>
+  <div th:replace="~{fragments :: header('categories')}"></div>
+
+  <main class="container">
+    <div class="page-title">
+      <h1>Категории</h1>
+      <p>Группы доходов и расходов</p>
+    </div>
+
+    <div class="app-shell">
+      <div th:replace="~{fragments :: sidebar('categories')}"></div>
+      <div>
+        <div th:replace="~{fragments :: flash}"></div>
+
+        <section class="panel" style="margin-bottom:1rem;">
+          <h2>Новая категория</h2>
+          <form class="form" th:action="@{/categories}" method="post">
+            <div class="grid-2">
+              <div class="field">
+                <label for="name">Название</label>
+                <input id="name" name="name" type="text" required maxlength="80">
+              </div>
+              <div class="field">
+                <label for="type">Тип</label>
+                <select id="type" name="type">
+                  <option th:each="t : ${types}" th:value="${t}" th:text="${t == T(ru.budgetly.budget.CategoryType).INCOME} ? 'Доход' : 'Расход'">Доход</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-actions">
+              <button class="btn btn-primary" type="submit">Добавить</button>
+            </div>
+          </form>
+        </section>
+
+        <div class="grid-2">
+          <section class="panel">
+            <h2>Доходы</h2>
+            <div class="list" style="margin-top:1rem;">
+              <div class="list-item" th:each="c : ${categories}" th:if="${c.type.name() == 'INCOME'}">
+                <form th:action="@{/categories/{id}/update(id=${c.id})}" method="post" style="display:grid;gap:0.5rem;width:100%;">
+                  <div class="grid-2">
+                    <input name="name" th:value="${c.name}" required>
+                    <select name="type">
+                      <option value="INCOME" selected>Доход</option>
+                      <option value="EXPENSE">Расход</option>
+                    </select>
+                  </div>
+                  <div class="form-actions">
+                    <button class="btn btn-secondary" type="submit">Сохранить</button>
+                    <button class="btn btn-danger" type="submit" formaction="#" th:formaction="@{/categories/{id}/delete(id=${c.id})}">Удалить</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </section>
+          <section class="panel">
+            <h2>Расходы</h2>
+            <div class="list" style="margin-top:1rem;">
+              <div class="list-item" th:each="c : ${categories}" th:if="${c.type.name() == 'EXPENSE'}">
+                <form th:action="@{/categories/{id}/update(id=${c.id})}" method="post" style="display:grid;gap:0.5rem;width:100%;">
+                  <div class="grid-2">
+                    <input name="name" th:value="${c.name}" required>
+                    <select name="type">
+                      <option value="INCOME">Доход</option>
+                      <option value="EXPENSE" selected>Расход</option>
+                    </select>
+                  </div>
+                  <div class="form-actions">
+                    <button class="btn btn-secondary" type="submit">Сохранить</button>
+                    <button class="btn btn-danger" type="submit" th:formaction="@{/categories/{id}/delete(id=${c.id})}">Удалить</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

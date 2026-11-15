@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Теги — Budgetly')}"></head>
+<body>
+  <div th:replace="~{fragments :: header('tags')}"></div>
+
+  <main class="container">
+    <div class="page-title">
+      <h1>Теги</h1>
+      <p>Метки для операций</p>
+    </div>
+
+    <div class="app-shell">
+      <div th:replace="~{fragments :: sidebar('tags')}"></div>
+      <div>
+        <div th:replace="~{fragments :: flash}"></div>
+
+        <section class="panel" style="margin-bottom:1rem;">
+          <h2>Новый тег</h2>
+          <form class="form" th:action="@{/tags}" method="post">
+            <div class="field">
+              <label for="name">Название</label>
+              <input id="name" name="name" type="text" required maxlength="40" placeholder="работа">
+            </div>
+            <div class="form-actions">
+              <button class="btn btn-primary" type="submit">Добавить</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="panel">
+          <h2>Список тегов</h2>
+          <div class="list" style="margin-top:1rem;">
+            <div class="list-item" th:each="tag : ${tags}">
+              <form th:action="@{/tags/{id}/update(id=${tag.id})}" method="post" style="display:flex;flex-wrap:wrap;gap:0.6rem;width:100%;align-items:center;">
+                <input name="name" th:value="${tag.name}" required style="flex:1;min-width:160px;">
+                <button class="btn btn-secondary" type="submit">Сохранить</button>
+                <button class="btn btn-danger" type="submit" th:formaction="@{/tags/{id}/delete(id=${tag.id})}">Удалить</button>
+              </form>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

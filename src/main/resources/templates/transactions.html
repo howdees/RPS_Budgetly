@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Транзакции — Budgetly')}"></head>
+<body>
+  <div th:replace="~{fragments :: header('transactions')}"></div>
+
+  <main class="container">
+    <div class="page-title">
+      <h1>Транзакции</h1>
+      <p>История доходов и расходов</p>
+    </div>
+
+    <div class="app-shell">
+      <div th:replace="~{fragments :: sidebar('transactions')}"></div>
+      <div>
+        <div th:replace="~{fragments :: flash}"></div>
+
+        <section class="panel" style="margin-bottom:1rem;">
+          <h2>Новая операция</h2>
+          <form class="form" th:action="@{/transactions}" method="post">
+            <div class="grid-2">
+              <div class="field">
+                <label for="categoryId">Категория</label>
+                <select id="categoryId" name="categoryId" required>
+                  <option th:each="c : ${categories}" th:value="${c.id}"
+                          th:text="${c.name + ' · ' + (c.type.name() == 'INCOME' ? 'доход' : 'расход')}">Категория</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="amount">Сумма</label>
+                <input id="amount" name="amount" type="number" step="0.01" min="0.01" required>
+              </div>
+              <div class="field">
+                <label for="operatedOn">Дата</label>
+                <input id="operatedOn" name="operatedOn" type="date" th:value="${today}" required>
+              </div>
+              <div class="field">
+                <label for="comment">Комментарий</label>
+                <input id="comment" name="comment" type="text" maxlength="200">
+              </div>
+            </div>
+            <div class="field">
+              <label>Теги</label>
+              <div class="chip-set">
+                <label class="chip" th:each="tag : ${tags}">
+                  <input type="checkbox" name="tagIds" th:value="${tag.id}">
+                  <span th:text="${tag.name}">тег</span>
+                </label>
+              </div>
+            </div>
+            <div class="form-actions">
+              <button class="btn btn-primary" type="submit">Добавить</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="panel" style="margin-bottom:1rem;">
+          <h2>Поиск</h2>
+          <form class="form" th:action="@{/transactions}" method="get">
+            <div class="grid-2">
+              <div class="field">
+                <label for="tag">По тегу</label>
+                <input id="tag" name="tag" type="text" th:value="${tagFilter}" placeholder="работа">
+              </div>
+              <div class="field">
+                <label for="category">По категории</label>
+                <input id="category" name="category" type="text" th:value="${categoryFilter}" placeholder="Продукты">
+              </div>
+            </div>
+            <div class="form-actions">
+              <button class="btn btn-primary" type="submit">Найти</button>
+              <a class="btn btn-secondary" th:href="@{/transactions}">Сбросить</a>
+            </div>
+          </form>
+        </section>
+
+        <section class="panel">
+          <div class="section-head">
+            <h2>Список операций</h2>
+          </div>
+          <div class="tx-list" th:if="${!#lists.isEmpty(transactions)}">
+            <form class="tx-card" th:each="tx : ${transactions}" th:action="@{/transactions/{id}/update(id=${tx.id})}" method="post">
+              <div class="tx-grid">
+                <input type="date" name="operatedOn" th:value="${tx.operatedOn}" required>
+                <select name="categoryId">
+                  <option th:each="c : ${categories}" th:value="${c.id}" th:selected="${c.id == tx.category.id}"
+                          th:text="${c.name}">Категория</option>
+                </select>
+                <input type="number" name="amount" step="0.01" min="0.01" th:value="${tx.amount}" required
+                       th:classappend="${tx.category.type.name() == 'INCOME'} ? ' amount-income' : ' amount-expense'">
+                <input type="text" name="comment" th:value="${tx.comment}" placeholder="Комментарий">
+                <div class="tx-actions">
+                  <button class="btn btn-secondary" type="submit">Сохранить</button>
+                  <button class="btn btn-danger" type="submit" th:formaction="@{/transactions/{id}/delete(id=${tx.id})}">Удалить</button>
+                </div>
+              </div>
+              <div class="chip-set">
+                <label class="chip" th:each="tag : ${tags}">
+                  <input type="checkbox" name="tagIds" th:value="${tag.id}" th:checked="${tx.tags.contains(tag)}">
+                  <span th:text="${tag.name}">тег</span>
+                </label>
+              </div>
+            </form>
+          </div>
+          <div th:if="${#lists.isEmpty(transactions)}" class="empty-state">Пока нет операций</div>
+        </section>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

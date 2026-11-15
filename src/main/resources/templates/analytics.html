@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Аналитика — Budgetly')}"></head>
+<body>
+  <div th:replace="~{fragments :: header('analytics')}"></div>
+
+  <main class="container wide">
+    <div class="page-title">
+      <h1>Аналитика</h1>
+      <p th:text="${#temporals.format(report.from, 'd MMMM yyyy')} + ' — ' + ${#temporals.format(report.to, 'd MMMM yyyy')}">период</p>
+    </div>
+
+    <div class="app-shell">
+      <div th:replace="~{fragments :: sidebar('analytics')}"></div>
+
+      <div class="analytics">
+        <form class="period-bar" method="get" th:action="@{/analytics}">
+          <div class="period-picks">
+            <a th:href="@{/analytics(period='month')}" th:classappend="${report.period == 'month'} ? ' is-on'">Месяц</a>
+            <a th:href="@{/analytics(period='quarter')}" th:classappend="${report.period == 'quarter'} ? ' is-on'">Квартал</a>
+            <a th:href="@{/analytics(period='half')}" th:classappend="${report.period == 'half'} ? ' is-on'">Полгода</a>
+            <a th:href="@{/analytics(period='year')}" th:classappend="${report.period == 'year'} ? ' is-on'">Год</a>
+            <a th:href="@{/analytics(period='all')}" th:classappend="${report.period == 'all'} ? ' is-on'">Всё время</a>
+          </div>
+          <div class="period-custom">
+            <input type="hidden" name="period" value="custom">
+            <input type="date" name="from" th:value="${report.from}">
+            <input type="date" name="to" th:value="${report.to}">
+            <button class="btn btn-secondary" type="submit">Показать</button>
+          </div>
+        </form>
+
+        <div class="stats stats-4">
+          <article class="stat">
+            <div class="label">Доходы</div>
+            <div class="value income" th:text="${#numbers.formatDecimal(report.income, 1, 'COMMA', 2, 'POINT')} + ' ₽'">0</div>
+            <div class="delta" th:classappend="${report.incomeChange.tone}" th:text="${report.incomeChange.text}">0%</div>
+            <p class="muted" th:text="'было ' + ${#numbers.formatDecimal(report.previousIncome, 1, 'COMMA', 0, 'POINT')} + ' ₽'">было</p>
+          </article>
+          <article class="stat">
+            <div class="label">Расходы</div>
+            <div class="value expense" th:text="${#numbers.formatDecimal(report.expense, 1, 'COMMA', 2, 'POINT')} + ' ₽'">0</div>
+            <div class="delta" th:classappend="${report.expenseChange.tone}" th:text="${report.expenseChange.text}">0%</div>
+            <p class="muted" th:text="'было ' + ${#numbers.formatDecimal(report.previousExpense, 1, 'COMMA', 0, 'POINT')} + ' ₽'">было</p>
+          </article>
+          <article class="stat">
+            <div class="label">Разница</div>
+            <div class="value" th:text="${#numbers.formatDecimal(report.net, 1, 'COMMA', 2, 'POINT')} + ' ₽'">0</div>
+            <div class="delta" th:classappend="${report.netChange.tone}" th:text="${report.netChange.text}">0%</div>
+            <p class="muted" th:if="${report.savingsRate != null}">
+              <a th:href="@{/faq#savings}" th:text="'норма сбережений ' + ${report.savingsRate} + '%'">норма</a>
+            </p>
+          </article>
+          <article class="stat">
+            <div class="label">Средний темп</div>
+            <div class="value" style="font-size:1.45rem;" th:text="${#numbers.formatDecimal(report.avgExpensePerDay, 1, 'COMMA', 0, 'POINT')} + ' ₽/день'">0</div>
+            <p class="muted" th:text="'чек ' + ${#numbers.formatDecimal(report.avgCheck, 1, 'COMMA', 0, 'POINT')} + ' ₽ · ' + ${report.operationCount} + ' опер.'">чек</p>
+          </article>
+        </div>
+
+        <section class="panel">
+          <div class="section-head">
+            <div>
+              <h2>Ритм расходов</h2>
+              <p class="muted">Сколько уходит в будни и сколько на выходных</p>
+            </div>
+          </div>
+          <div class="rhythm" th:if="${report.expense.signum() > 0}">
+            <div class="rhythm-split">
+              <div class="rhythm-fill weekday" th:style="'width:' + ${100 - report.weekendShare} + '%'"></div>
+              <div class="rhythm-fill weekend" th:style="'width:' + ${report.weekendShare} + '%'"></div>
+            </div>
+            <div class="rhythm-legend">
+              <div>
+                <span class="swatch income"></span>
+                <strong th:text="${#numbers.formatDecimal(report.weekdayExpense, 1, 'COMMA', 0, 'POINT')} + ' ₽'">0</strong>
+                <span class="muted" th:text="'будни · ' + ${100 - report.weekendShare} + '%'">будни</span>
+              </div>
+              <div>
+                <span class="swatch expense"></span>
+                <strong th:text="${#numbers.formatDecimal(report.weekendExpense, 1, 'COMMA', 0, 'POINT')} + ' ₽'">0</strong>
+                <span class="muted" th:text="'выходные · ' + ${report.weekendShare} + '%'">выходные</span>
+              </div>
+            </div>
+            <p class="muted rhythm-note"
+               th:text="'Траты были в ' + ${report.expenseDays} + ' из ' + ${report.days} + ' дней периода.'">сводка</p>
+            <p class="muted rhythm-note" th:if="${report.runwayDays != null}"
+               th:text="'Разница доходов и расходов покрывает около ' + ${#numbers.formatDecimal(report.runwayDays, 1, 'COMMA', 0, 'POINT')} + ' дней среднего расхода.'">запас</p>
+          </div>
+          <div th:if="${report.expense.signum() == 0}" class="empty-state">В этом периоде расходов нет</div>
+        </section>
+
+        <section class="panel" th:if="${report.limit != null or report.projectedExpense != null}">
+          <div class="section-head">
+            <div>
+              <h2>Лимит и прогноз</h2>
+              <p class="muted" th:if="${report.goalTitle != null}" th:text="'Цель: ' + ${report.goalTitle}">цель</p>
+            </div>
+            <strong th:if="${report.limit != null}"
+                    th:class="${report.overLimit} ? 'amount-expense' : 'amount-income'"
+                    th:text="${report.overLimit} ? 'лимит превышен' : 'в пределах лимита'">статус</strong>
+          </div>
+          <div th:if="${report.limit != null}">
+            <p class="muted" th:text="${#numbers.formatDecimal(report.expense, 1, 'COMMA', 0, 'POINT')} + ' ₽ из ' + ${#numbers.formatDecimal(report.limit, 1, 'COMMA', 0, 'POINT')} + ' ₽ · осталось ' + ${#numbers.formatDecimal(report.limitLeft, 1, 'COMMA', 0, 'POINT')} + ' ₽'">лимит</p>
+            <div class="bar-track limit-track">
+              <div class="bar-fill" th:classappend="${report.overLimit} ? ' expense' : ' income'" th:style="'width:' + ${report.limitShare} + '%'"></div>
+            </div>
+          </div>
+          <p th:if="${report.projectedExpense != null}" class="forecast-line">
+            При текущем темпе к концу месяца выйдет
+            <strong th:text="${#numbers.formatDecimal(report.projectedExpense, 1, 'COMMA', 0, 'POINT')} + ' ₽'">0</strong><span th:if="${report.limit != null}"
+                  th:text="${report.projectedExpense.compareTo(report.limit) > 0} ? ' — выше лимита.' : ' — в рамках лимита.'">.</span>
+          </p>
+        </section>
+
+        <section class="panel">
+          <div class="section-head">
+            <div>
+              <h2>Доходы и расходы по времени</h2>
+              <p class="muted">Зелёный — поступления, красный — траты</p>
+            </div>
+            <div class="legend">
+              <span><i class="swatch income"></i>доход</span>
+              <span><i class="swatch expense"></i>расход</span>
+            </div>
+          </div>
+          <div class="flow" th:if="${!report.timeline.isEmpty()}">
+            <div class="flow-col" th:each="bucket : ${report.timeline}">
+              <div class="flow-bars">
+                <div class="flow-bar income" th:style="'height:' + ${bucket.incomeBar} + '%'" th:title="${#numbers.formatDecimal(bucket.income, 1, 'COMMA', 0, 'POINT')}"></div>
+                <div class="flow-bar expense" th:style="'height:' + ${bucket.expenseBar} + '%'" th:title="${#numbers.formatDecimal(bucket.expense, 1, 'COMMA', 0, 'POINT')}"></div>
+              </div>
+              <span th:text="${bucket.label}">дата</span>
+            </div>
+          </div>
+          <div th:if="${report.timeline.isEmpty()}" class="empty-state">Нет точек на графике</div>
+        </section>
+
+        <section class="panel" th:if="${report.months.size() > 1}">
+          <div class="section-head">
+            <div>
+              <h2>По месяцам</h2>
+              <p class="muted">Доход, расход и разница внутри выбранного диапазона</p>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Месяц</th><th>Доходы</th><th>Расходы</th><th>Разница</th></tr>
+              </thead>
+              <tbody>
+                <tr th:each="line : ${report.months}">
+                  <td th:text="${line.label}">месяц</td>
+                  <td class="amount-income" th:text="${#numbers.formatDecimal(line.income, 1, 'COMMA', 0, 'POINT')}">0</td>
+                  <td class="amount-expense" th:text="${#numbers.formatDecimal(line.expense, 1, 'COMMA', 0, 'POINT')}">0</td>
+                  <td th:text="${#numbers.formatDecimal(line.net, 1, 'COMMA', 0, 'POINT')}">0</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <div class="grid-2">
+          <section class="panel">
+            <div class="section-head">
+              <div>
+                <h2>Куда уходят деньги</h2>
+                <p class="muted">Доля категорий в расходах</p>
+              </div>
+            </div>
+            <div class="bars" th:if="${!report.expenseCategories.isEmpty()}">
+              <div class="bar-block" th:each="slice : ${report.expenseCategories}">
+                <div class="bar-caption">
+                  <span th:text="${slice.name}">категория</span>
+                  <strong th:text="${#numbers.formatDecimal(slice.amount, 1, 'COMMA', 0, 'POINT')} + ' ₽ · ' + ${slice.share} + '%'">0</strong>
+                </div>
+                <div class="bar-track"><div class="bar-fill expense" th:style="'width:' + ${slice.bar} + '%'"></div></div>
+              </div>
+            </div>
+            <div th:if="${report.expenseCategories.isEmpty()}" class="empty-state">Расходов в периоде нет</div>
+          </section>
+
+          <section class="panel">
+            <div class="section-head">
+              <div>
+                <h2>Откуда приходят деньги</h2>
+                <p class="muted">Доля категорий в доходах</p>
+              </div>
+            </div>
+            <div class="bars" th:if="${!report.incomeCategories.isEmpty()}">
+              <div class="bar-block" th:each="slice : ${report.incomeCategories}">
+                <div class="bar-caption">
+                  <span th:text="${slice.name}">категория</span>
+                  <strong th:text="${#numbers.formatDecimal(slice.amount, 1, 'COMMA', 0, 'POINT')} + ' ₽ · ' + ${slice.share} + '%'">0</strong>
+                </div>
+                <div class="bar-track"><div class="bar-fill income" th:style="'width:' + ${slice.bar} + '%'"></div></div>
+              </div>
+            </div>
+            <div th:if="${report.incomeCategories.isEmpty()}" class="empty-state">Доходов в периоде нет</div>
+          </section>
+        </div>
+
+        <div class="grid-2">
+          <section class="panel">
+            <div class="section-head">
+              <div>
+                <h2>Дни недели</h2>
+                <p class="muted">В какой день расходы выше</p>
+              </div>
+            </div>
+            <div class="week">
+              <div class="week-col" th:each="day : ${report.weekdays}">
+                <div class="week-bar" th:style="'height:' + ${day.bar} + '%'"></div>
+                <span th:text="${day.name}">Пн</span>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="section-head">
+              <div>
+                <h2>Метки расходов</h2>
+                <p class="muted">Сумма трат, на которых стоит метка</p>
+              </div>
+            </div>
+            <div class="bars" th:if="${!report.tags.isEmpty()}">
+              <div class="bar-row" th:each="slice : ${report.tags}">
+                <span th:text="${slice.name}">метка</span>
+                <div class="bar-track"><div class="bar-fill income" th:style="'width:' + ${slice.bar} + '%'"></div></div>
+                <strong th:text="${#numbers.formatDecimal(slice.amount, 1, 'COMMA', 0, 'POINT')}">0</strong>
+              </div>
+            </div>
+            <div th:if="${report.tags.isEmpty()}" class="empty-state">На расходах периода нет меток</div>
+          </section>
+        </div>
+
+        <div class="grid-2">
+          <section class="panel">
+            <div class="section-head">
+              <div>
+                <h2>Что видно по цифрам</h2>
+                <p class="muted"><a th:href="@{/faq}">Словарь терминов</a></p>
+              </div>
+            </div>
+            <ul class="insights">
+              <li th:each="line : ${report.insights}" th:text="${line}">вывод</li>
+            </ul>
+          </section>
+
+          <section class="panel">
+            <div class="section-head">
+              <div>
+                <h2>Крупные траты</h2>
+                <p class="muted">Пять самых больших расходов периода</p>
+              </div>
+            </div>
+            <div class="list">
+              <div class="list-item" th:each="item : ${report.largest}">
+                <div>
+                  <strong th:text="${item.category}">Категория</strong>
+                  <div class="meta">
+                    <span th:text="${#temporals.format(item.date, 'd MMM')}">дата</span>
+                    <span th:if="${!item.comment.isEmpty()}" th:text="' · ' + ${item.comment}">комментарий</span>
+                  </div>
+                </div>
+                <div class="amount-expense" th:text="${#numbers.formatDecimal(item.amount, 1, 'COMMA', 2, 'POINT')} + ' ₽'">0</div>
+              </div>
+              <div th:if="${report.largest.isEmpty()}" class="empty-state">Крупных трат нет</div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </main>
+</body>
+</html>
