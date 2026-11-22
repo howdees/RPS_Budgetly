@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments :: head('Админ-панель — Budgetly')}"></head>
+<body>
+  <div th:replace="~{fragments :: header('admin')}"></div>
+
+  <main class="container">
+    <div class="page-title">
+      <h1>Пользователи</h1>
+      <p>Редактирование и удаление учётных записей</p>
+    </div>
+
+    <div class="app-shell">
+      <div th:replace="~{fragments :: sidebar('admin')}"></div>
+      <div>
+        <div th:replace="~{fragments :: flash}"></div>
+
+        <section class="panel">
+          <div class="section-head">
+            <div>
+              <h2>Пользователи системы</h2>
+              <p class="muted">Можно менять имя, почту, статус, роль и пароль. Собственный аккаунт удалить нельзя.</p>
+            </div>
+          </div>
+
+          <div class="admin-users" th:if="${!#lists.isEmpty(users)}">
+            <form class="admin-user-card" th:each="u : ${users}" th:action="@{/admin/users/{id}/update(id=${u.id})}" method="post">
+              <div class="admin-user-grid">
+                <div class="field">
+                  <label>Имя</label>
+                  <input name="name" th:value="${u.name}" required maxlength="80">
+                </div>
+                <div class="field">
+                  <label>Email</label>
+                  <input name="email" type="email" th:value="${u.email}" required maxlength="120">
+                </div>
+                <div class="field">
+                  <label>Новый пароль</label>
+                  <input name="newPassword" type="password" minlength="6" placeholder="не менять">
+                </div>
+              </div>
+              <div class="admin-user-flags">
+                <label class="chip">
+                  <input type="checkbox" name="enabled" value="true" th:checked="${u.enabled}">
+                  <span>Активен</span>
+                </label>
+                <label class="chip">
+                  <input type="checkbox" name="adminRole" value="true" th:checked="${u.roles.contains(T(ru.budgetly.user.Role).ADMIN)}">
+                  <span>Администратор</span>
+                </label>
+                <span class="muted" th:text="'ID ' + ${u.id}">ID</span>
+              </div>
+              <div class="form-actions" style="margin:0;">
+                <button class="btn btn-secondary" type="submit">Сохранить</button>
+                <button class="btn btn-danger" type="submit"
+                        th:formaction="@{/admin/users/{id}/delete(id=${u.id})}"
+                        th:disabled="${#authentication.name == u.email}"
+                        onclick="return confirm('Удалить пользователя и все его данные бюджета?');">
+                  Удалить
+                </button>
+              </div>
+            </form>
+          </div>
+          <div th:if="${#lists.isEmpty(users)}" class="empty-state">Пользователей нет</div>
+        </section>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

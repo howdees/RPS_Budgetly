@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments :: head('Budgetly — личный бюджет')}"></head>
+<body>
+  <div th:replace="~{fragments :: header('home')}"></div>
+
+  <main>
+    <section class="container hero">
+      <div class="hero-copy">
+        <span class="badge">личный бюджет</span>
+        <h1>Деньги видны, пока месяц не кончился</h1>
+        <p>Budgetly хранит доходы и расходы, раскладывает их по категориям и показывает, на что уходит зарплата. Без таблиц, которые надо сводить вручную.</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" sec:authorize="isAuthenticated()" th:href="@{/dashboard}">Открыть обзор</a>
+          <a class="btn btn-primary" sec:authorize="!isAuthenticated()" th:href="@{/register}">Создать аккаунт</a>
+          <a class="btn btn-secondary" href="#features">Что умеет</a>
+        </div>
+      </div>
+      <div class="hero-visual" aria-hidden="true">
+        <div class="hero-visual-inner">
+          <span>Ноябрь · лимит 50 000 ₽</span>
+          <strong>осталось 9 550 ₽</strong>
+          <span>Продукты 34% · жильё 28% · кафе 11%</span>
+        </div>
+      </div>
+    </section>
+
+    <div th:if="${param.logout}" class="container"><div class="notice">Вы вышли из аккаунта.</div></div>
+
+    <section class="container section" id="features">
+      <div class="section-head">
+        <div>
+          <h2>Для чего это нужно</h2>
+          <p>Один кабинет вместо блокнота, банковской выписки и отдельной таблицы.</p>
+        </div>
+      </div>
+      <div class="grid-3">
+        <article class="stat">
+          <div class="label">Операции</div>
+          <div class="value" style="font-size:1.35rem;">Каждая сумма на месте</div>
+          <p class="muted">Дата, категория, комментарий и метки. Чужие записи не попадают в ваш список.</p>
+        </article>
+        <article class="stat">
+          <div class="label">Категории</div>
+          <div class="value" style="font-size:1.35rem;">Доход отдельно от расхода</div>
+          <p class="muted">Зарплата, подработка, продукты, жильё, кафе. Состав категорий задаёте вы.</p>
+        </article>
+        <article class="stat">
+          <div class="label">Аналитика</div>
+          <div class="value" style="font-size:1.35rem;">Период, а не одна цифра</div>
+          <p class="muted">Месяц, квартал, полгода или свои даты. Сравнение с прошлым таким же отрезком.</p>
+        </article>
+        <article class="stat">
+          <div class="label">Лимит</div>
+          <div class="value" style="font-size:1.35rem;">Потолок месяца</div>
+          <p class="muted">В профиле задаётся лимит. На аналитике видно, сколько уже израсходовано.</p>
+        </article>
+        <article class="stat">
+          <div class="label">Метки</div>
+          <div class="value" style="font-size:1.35rem;">Срез по смыслу</div>
+          <p class="muted">«Дом», «здоровье», «отдых» можно повесить на разные категории и потом отфильтровать.</p>
+        </article>
+        <article class="stat">
+          <div class="label">Доступ</div>
+          <div class="value" style="font-size:1.35rem;">Только свои данные</div>
+          <p class="muted">Гость видит эту страницу. Бюджет открывается после входа. Список пользователей — у администратора.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="container section" id="how">
+      <div class="section-head">
+        <div>
+          <h2>Как этим пользоваться</h2>
+          <p>Три шага, дальше цифры считает система.</p>
+        </div>
+      </div>
+      <ol class="steps">
+        <li>
+          <span>1</span>
+          <div>
+            <strong>Регистрация</strong>
+            <p>Имя, почта и пароль. Пароль в базе хранится только как хеш.</p>
+          </div>
+        </li>
+        <li>
+          <span>2</span>
+          <div>
+            <strong>Операции</strong>
+            <p>Добавляете доход или расход, выбираете категорию и при необходимости метки.</p>
+          </div>
+        </li>
+        <li>
+          <span>3</span>
+          <div>
+            <strong>Аналитика</strong>
+            <p>Смотрите структуру трат, дни недели, крупные суммы и короткий вывод по выбранному периоду.</p>
+          </div>
+        </li>
+      </ol>
+    </section>
+
+    <section class="container section">
+      <div class="story">
+        <div>
+          <h2>Что показывает аналитика</h2>
+          <p class="muted">Текст в блоке «Что видно по цифрам» собирается из ваших операций, а не из общего шаблона на всех.</p>
+          <ul class="insights">
+            <li>главная категория расходов и её доля;</li>
+            <li>насколько траты выросли или упали к прошлому периоду;</li>
+            <li>день недели, в который уходит больше всего;</li>
+            <li>норма сбережений и расход месячного лимита.</li>
+          </ul>
+        </div>
+        <div class="story-card" aria-hidden="true">
+          <div class="bar-row"><span>Жильё</span><div class="bar-track"><div class="bar-fill expense" style="width:100%"></div></div><strong>28%</strong></div>
+          <div class="bar-row"><span>Продукты</span><div class="bar-track"><div class="bar-fill expense" style="width:78%"></div></div><strong>22%</strong></div>
+          <div class="bar-row"><span>Кафе</span><div class="bar-track"><div class="bar-fill expense" style="width:40%"></div></div><strong>11%</strong></div>
+          <div class="bar-row"><span>Транспорт</span><div class="bar-track"><div class="bar-fill expense" style="width:28%"></div></div><strong>8%</strong></div>
+        </div>
+      </div>
+      <div class="hero-actions" style="margin-top:1.4rem;">
+        <a class="btn btn-primary" sec:authorize="isAuthenticated()" th:href="@{/analytics}">Открыть аналитику</a>
+        <a class="btn btn-primary" sec:authorize="!isAuthenticated()" th:href="@{/register}">Начать учёт</a>
+        <a class="btn btn-secondary" sec:authorize="!isAuthenticated()" th:href="@{/login}">Уже есть аккаунт</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">Budgetly · личные доходы, расходы и аналитика</div>
+  </footer>
+</body>
+</html>
